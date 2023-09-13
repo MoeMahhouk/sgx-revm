@@ -14,14 +14,14 @@ use mbedtls::{
 };
 use std::{
     io::{BufRead, BufReader, Write},
-    net::{TcpListener, TcpStream},
+    net::TcpStream,
     time::{SystemTime, UNIX_EPOCH},
 };
 
 const RSA_KEY_SIZE: u32 = 3072;
 const RSA_KEY_EXP: u32 = 0x10001;
 const DAYS_TO_SES: u64 = 86400;
-const CERT_VAL_SECS: u64 = (365 * DAYS_TO_SES);
+const CERT_VAL_SECS: u64 = 365 * DAYS_TO_SES;
 
 /// Establish a TLS connection with a randomly generated key and
 /// a self signed certificate.
@@ -104,7 +104,7 @@ fn get_validity() -> (Time, Time) {
         .unwrap()
         .as_secs();
     let end = start + CERT_VAL_SECS;
-    let not_before = Utc.timestamp(start as _, 0);
-    let not_after = Utc.timestamp(end as _, 0);
+    let not_before = Utc.timestamp_opt(start as _, 0).unwrap();
+    let not_after = Utc.timestamp_opt(end as _, 0).unwrap();
     (not_before.to_time(), not_after.to_time())
 }

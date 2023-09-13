@@ -7,7 +7,7 @@ use revm::{
 use std::{io::Read, net::TcpListener};
 
 mod server;
-use server::{get_key_and_cert, serve};
+use server::get_key_and_cert;
 
 // This payload should be generalized to include all the pre-state for each
 // simulation.
