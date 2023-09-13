@@ -1,4 +1,4 @@
-use alloy_primitives::{Address, U256, U160};
+use alloy_primitives::{Address, U256};
 use revm::{
     primitives::{AccountInfo, TxEnv, B160},
     InMemoryDB, EVM,
@@ -64,7 +64,7 @@ fn simulate(payload: Payload) -> eyre::Result<()> {
 
     evm.env.tx = TxEnv {
         caller: address,
-        transact_to: revm::primitives::TransactTo::Call(B160::from_str(&receiver.to_string()).unwrap()),
+        transact_to: revm::primitives::TransactTo::Call(B160::from(receiver.0 .0)),
         value,
         ..Default::default()
     };
