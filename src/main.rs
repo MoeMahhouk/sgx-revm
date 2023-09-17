@@ -1,4 +1,6 @@
-use alloy_primitives::{Address, U256};
+use serde::{Serialize, Deserialize};
+use alloy_primitives::{Address, U256, StorageKey, TxHash, StorageValue};
+
 use revm::{
     primitives::{AccountInfo, TxEnv, B160},
     InMemoryDB, EVM,
@@ -11,13 +13,39 @@ use server::get_key_and_cert;
 
 // This payload should be generalized to include all the pre-state for each
 // simulation.
-#[derive(serde::Deserialize)]
+#[derive(Serialize, Deserialize)]
 struct Payload {
     sender: Address,
     amount: U256,
 }
 
-fn main() -> eyre::Result<()> {
+
+#[derive(Serialize, Deserialize, Debug)]
+struct AccessListData {
+    address: Address,
+    storage_keys: Vec<StorageKey>,
+    storage_values: Vec<StorageValue>,
+}
+
+
+// This payload should be generalized to include all the pre-state for each
+// simulation.
+#[derive(Serialize, Deserialize)]
+struct Payload2 {
+    state_root: U256,
+    sender_address: Address,
+    access_list: Vec<AccessListData>,
+    tx_hash: TxHash,
+}
+
+/*#[post("/payload", data = "<payload>")]
+fn post_payload(payload: Json<Payload>) -> Json<Payload> {
+    let received_payload: Payload = serde_json::from_slice(payload);
+    simulate(received_payload)
+}*/
+
+fn main() -> eyre::Result<()>{
+
     let (mut key, mut cert) = get_key_and_cert();
     // dbg!(&cert);
     let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
@@ -26,14 +54,18 @@ fn main() -> eyre::Result<()> {
         let mut stream = stream.unwrap();
         let mut buf = vec![];
         let _num_bytes = stream.read_to_end(&mut buf)?;
-        let data: Payload = serde_json::from_slice(&buf)?;
-        simulate(data)?;
+        let data: Payload2 = serde_json::from_slice(&buf)?;
+        simulate_storage_proofs_validation(data)?;
 
         // TODO: Re-enable this,
         // let _ = serve(stream, &mut key, &mut cert).unwrap();
     }
-
     Ok(())
+    
+    /*rocket::ignite()
+        .mount("/", routes![post_payload])
+        .launch();*/
+    
 }
 
 fn simulate(payload: Payload) -> eyre::Result<()> {
@@ -77,6 +109,24 @@ fn simulate(payload: Payload) -> eyre::Result<()> {
     );
 
     dbg!(&result);
+
+    Ok(())
+}
+
+
+fn simulate_storage_proofs_validation(payload: Payload2) -> eyre::Result<()> {
+    // Storage and Access List Proofs are parsed inside the payload as a vec<address, storageKeys>.
+
+    // Retrieve the Block's State Root is also parsed inside the payload (currently coming from the untrusted side leaving the it to the validator to check if the state root matches or not).
+
+    // Extract the above and rebuild the MPT to Verify Access List.
+
+    //Verify Storage Proofs for Access List Keys.
+    // a. Obtain state root.
+    // b. Loop through access list keys.
+    // c. Verify storage proofs.
+
+    // Step 5: Complete Verification.
 
     Ok(())
 }
