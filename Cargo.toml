@@ -8,6 +8,8 @@ edition = "2021"
 [dependencies]
 alloy-primitives = { version = "0.3.3", features = ["serde"] }
 revm = { git = "https://github.com/bluealloy/revm" }
+# some packages in reth are not compatibile with the previously selected packages
+#reth = { git = "https://github.com/paradigmxyz/reth"}
 
 # Necessary for setting up the TLS connection.
 # 0.11: memcpy is not static

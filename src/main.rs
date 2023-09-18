@@ -1,6 +1,5 @@
 use serde::{Serialize, Deserialize};
 use alloy_primitives::{Address, U256, StorageKey, TxHash, StorageValue};
-
 use revm::{
     primitives::{AccountInfo, TxEnv, B160},
     InMemoryDB, EVM,
@@ -100,6 +99,7 @@ fn simulate(payload: Payload) -> eyre::Result<()> {
         value,
         ..Default::default()
     };
+
 
     let result = evm.transact_ref()?;
 
