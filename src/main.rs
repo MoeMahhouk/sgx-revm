@@ -19,18 +19,26 @@ struct Payload {
 }
 
 
+
+#[derive(Serialize, Deserialize, Debug)]
+struct StorageKeyProofData {
+    storage_key: StorageKey,
+    storage_proof: StorageValue,
+    expected_value: U256, 
+}
+
+
 #[derive(Serialize, Deserialize, Debug)]
 struct AccessListData {
     address: Address,
-    storage_keys: Vec<StorageKey>,
-    storage_values: Vec<StorageValue>,
+    storage_key_proof_data: Vec<StorageKeyProofData>,
 }
 
 
 // This payload should be generalized to include all the pre-state for each
 // simulation.
 #[derive(Serialize, Deserialize)]
-struct Payload2 {
+struct ValidationPayload {
     state_root: U256,
     sender_address: Address,
     access_list: Vec<AccessListData>,
@@ -53,7 +61,7 @@ fn main() -> eyre::Result<()>{
         let mut stream = stream.unwrap();
         let mut buf = vec![];
         let _num_bytes = stream.read_to_end(&mut buf)?;
-        let data: Payload2 = serde_json::from_slice(&buf)?;
+        let data: ValidationPayload = serde_json::from_slice(&buf)?;
         simulate_storage_proofs_validation(data)?;
 
         // TODO: Re-enable this,
@@ -114,7 +122,7 @@ fn simulate(payload: Payload) -> eyre::Result<()> {
 }
 
 
-fn simulate_storage_proofs_validation(payload: Payload2) -> eyre::Result<()> {
+fn simulate_storage_proofs_validation(payload: ValidationPayload) -> eyre::Result<()> {
     // Storage and Access List Proofs are parsed inside the payload as a vec<address, storageKeys>.
 
     // Retrieve the Block's State Root is also parsed inside the payload (currently coming from the untrusted side leaving the it to the validator to check if the state root matches or not).
